@@ -1,0 +1,7 @@
+{
+  "hourly_rate": 45.00,
+  "billing_cycle_type": "biweekly",
+  "auto_clock_in": true,
+  "auto_clock_out": true,
+  "database_path": "timeclock.db"
+}
