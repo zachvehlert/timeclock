@@ -86,8 +86,15 @@ class TimeclockApp:
         """Clean up resources."""
         # Auto clock-out based on config
         if self.config.get('auto_clock_out', True) and self.timeclock.is_clocked_in():
-            earnings = self.timeclock.clock_out()
-            self.console.print(f"\n[yellow]Auto clocked out! Session earnings: ${earnings:.2f}[/yellow]")
+            # Prompt for memo
+            self.console.print("\n[cyan]Add a memo for this session (press Enter to skip):[/cyan]")
+            try:
+                memo = input("> ").strip()
+            except (EOFError, KeyboardInterrupt):
+                memo = ""
+
+            earnings = self.timeclock.clock_out(memo)
+            self.console.print(f"[yellow]Auto clocked out! Session earnings: ${earnings:.2f}[/yellow]")
 
         self.db.close()
         self.console.print("[dim]Goodbye![/dim]")

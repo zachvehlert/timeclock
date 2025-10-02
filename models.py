@@ -44,7 +44,7 @@ class TimeClock:
         self.current_session_id = self.db.start_session()
         return datetime.now()
 
-    def clock_out(self) -> Optional[float]:
+    def clock_out(self, memo: str = "") -> Optional[float]:
         """Clock out and calculate earnings."""
         if not self.current_session_id:
             return None
@@ -58,7 +58,7 @@ class TimeClock:
         hours_worked = duration.total_seconds() / 3600
         earnings = hours_worked * self.hourly_rate
 
-        self.db.end_session(self.current_session_id, earnings)
+        self.db.end_session(self.current_session_id, earnings, memo)
         self.current_session_id = None
 
         return earnings

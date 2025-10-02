@@ -90,7 +90,8 @@ class TimeclockExporter:
                 'End Time',
                 'Duration (hours)',
                 'Hourly Rate',
-                'Earnings'
+                'Earnings',
+                'Memo'
             ])
 
             hourly_rate = self.config.get('hourly_rate', 50.00)
@@ -107,7 +108,8 @@ class TimeclockExporter:
                         end.strftime('%I:%M %p'),
                         f"{duration:.2f}",
                         f"${hourly_rate:.2f}",
-                        f"${session['earnings']:.2f}" if session['earnings'] else "$0.00"
+                        f"${session['earnings']:.2f}" if session['earnings'] else "$0.00",
+                        session.get('memo', '') or ''
                     ])
 
                     total_hours += duration

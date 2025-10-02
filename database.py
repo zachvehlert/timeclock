@@ -21,9 +21,18 @@ class Database:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 start_time TIMESTAMP NOT NULL,
                 end_time TIMESTAMP,
-                earnings REAL
+                earnings REAL,
+                memo TEXT
             )
         """)
+
+        # Add memo column if it doesn't exist (for existing databases)
+        try:
+            cursor.execute("ALTER TABLE sessions ADD COLUMN memo TEXT")
+            self.connection.commit()
+        except sqlite3.OperationalError:
+            # Column already exists
+            pass
 
         # Create billing_cycles table
         cursor.execute("""
@@ -76,21 +85,21 @@ class Database:
         self.connection.commit()
         return cursor.lastrowid
 
-    def end_session(self, session_id: int, earnings: float):
+    def end_session(self, session_id: int, earnings: float, memo: str = ""):
         """End a work session and record earnings."""
         cursor = self.connection.cursor()
         cursor.execute("""
             UPDATE sessions
-            SET end_time = ?, earnings = ?
+            SET end_time = ?, earnings = ?, memo = ?
             WHERE id = ?
-        """, (datetime.now(), earnings, session_id))
+        """, (datetime.now(), earnings, memo, session_id))
         self.connection.commit()
 
     def get_current_session(self) -> Optional[Dict[str, Any]]:
         """Get the current active session (no end_time)."""
         cursor = self.connection.cursor()
         cursor.execute("""
-            SELECT id, start_time, end_time, earnings
+            SELECT id, start_time, end_time, earnings, memo
             FROM sessions
             WHERE end_time IS NULL
             ORDER BY start_time DESC
@@ -161,7 +170,7 @@ class Database:
         """Get all sessions within a date range."""
         cursor = self.connection.cursor()
         cursor.execute("""
-            SELECT id, start_time, end_time, earnings
+            SELECT id, start_time, end_time, earnings, memo
             FROM sessions
             WHERE DATE(start_time) BETWEEN ? AND ?
             ORDER BY start_time
